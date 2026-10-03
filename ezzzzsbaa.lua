@@ -1,4 +1,36 @@
+-- ========== 密钥系统绕过 ==========
 getgenv().SentinelBypass = true
+getgenv().SkipKeySystem = true
+
+-- Hook loadstring，拦截 WindUI 初始化
+local _oldLoadstring = loadstring
+getgenv().loadstring = function(src)
+  local f = _oldLoadstring(src)
+  if type(f) == "function" and type(src) == "string" and src:find("WindUI", 1, true) then
+    return function(...)
+      local result = f(...)
+      if type(result) == "table" and result.CreateWindow then
+        local _cw = result.CreateWindow
+        result.CreateWindow = function(self, cfg, ...)
+          if type(cfg) == "table" then
+            cfg.KeySystem = nil
+          end
+          return _cw(self, cfg, ...)
+        end
+      end
+      return result
+    end
+  end
+  return f
+end
+
+-- 同时移除密钥服务注册
+task.spawn(function()
+  task.wait(0.5)
+  if WindUI and WindUI.Services then
+    WindUI.Services["SentinelKey-Examination"] = nil
+  end
+end)
 local players = game:GetService("Players")
 local lighting = game:GetService("Lighting")
 local replicatedStorage = game:GetService("ReplicatedStorage")
