@@ -1,3 +1,4 @@
+getgenv().SentinelBypass = true
 local players = game:GetService("Players")
 local lighting = game:GetService("Lighting")
 local replicatedStorage = game:GetService("ReplicatedStorage")
